@@ -1,0 +1,38 @@
+{
+  "name": "recruitment-app",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "serve": "vite preview",
+    "build": "vite build",
+    "dev": "vite",
+    "format": "prettier --write src/",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mdi/font": "5.9.55",
+    "ant-design-vue": "^4.2.6",
+    "autoprefixer": "^10.4.22",
+    "axios": "^1.13.2",
+    "postcss": "^8.5.6",
+    "postcss-loader": "^8.2.0",
+    "roboto-fontface": "*",
+    "vue": "^3.5.22",
+    "vue-router": "^4.6.3",
+    "vuetify": "^3.0.0-beta.0",
+    "webfontloader": "^1.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "prettier": "3.6.2",
+    "tailwindcss": "^3.4.18",
+    "vite": "^7.1.11",
+    "vite-plugin-vue-devtools": "^8.0.3",
+    "vite-plugin-vuetify": "^2.1.2",
+    "vue-cli-plugin-vuetify": "~2.5.8"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "type": "module"
+}

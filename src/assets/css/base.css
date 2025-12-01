@@ -1,0 +1,23 @@
+/* button color*/
+:root {
+  --primary-btn-color: #2ba11b;
+  --secondary-btn-color: #666666;
+}
+/* background color */
+:root {
+  --bg-primary-color: #ebecef;
+}
+
+/* text color */
+:root {
+  --text-primary-color: #1e2633;
+  --text-secondary-color: #2ba11b;
+  --text-non-active-color: #fff;
+}
+
+/* icon color */
+:root {
+  --icon-primary-color: #7a8188;
+  --icon-secondary-color: #ffffff;
+  --icon-hover-color: white;
+}
