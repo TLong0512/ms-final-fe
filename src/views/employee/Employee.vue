@@ -25,7 +25,7 @@
         <div class="icon icon-reset"></div>
       </div>
       <!-- Table container -->
-      <div class="flex-1 min-h-0 min-w-0 overflow-x-auto mt-3">
+      <div class="flex-1 min-h-0 min-w-0 overflow-x-auto mt-3 border">
         <ms-table
           :fields="fields"
           :rows="employees"
@@ -36,7 +36,7 @@
         </ms-table>
       </div>
       <!-- Paging -->
-      <div class="h-10 flex justify-between items-end mx-2">
+      <div class="h-10 flex justify-between items-center">
         <span>
           Tổng <strong>{{ totalItems }}</strong> bản ghi
         </span>
@@ -54,9 +54,11 @@
             ></div>
           </ms-dropdown>
           <ms-pagination
-            :total="totalItems"
-            v-model:current="page"
-          ></ms-pagination>
+            class="ml-3"
+            v-model="page"
+            :total-items="totalItems"
+            :page-size="pageSize"
+          />
         </div>
       </div>
     </div>
@@ -66,14 +68,16 @@
 import MsButton from "@/components/ms-button/MsButton.vue";
 import MsInput from "@/components/ms-input/MsInput.vue";
 import { onMounted, ref } from "vue";
+import { watch } from "vue";
 import EmployeeAPI from "@/services/components/employee/EmployeeAPI";
 import MsTable from "@/components/ms-table/MsTable.vue";
 import MsDropdown from "@/components/ms-dropdown/MsDropdown.vue";
 import MsPagination from "@/components/ms-pagination/MsPagination.vue";
+
 const page = ref(1);
-const pageSize = ref(10);
+const pageSize = ref(20);
 const totalItems = ref(0);
-const totalPages = ref(0);
+const totalPages = ref();
 const employees = ref();
 
 onMounted(async () => {
@@ -106,18 +110,6 @@ const handleEdit = (row) => {};
 const handleDuplicate = (row) => {};
 const handleDelete = (row) => {};
 
-const dropDownItems = [
-  {
-    key: "duplicate",
-    title: "Nhân bản",
-    icon: "",
-  },
-  {
-    key: "delete",
-    title: "Xóa",
-    icon: "",
-  },
-];
 const pagingDropDownItems = [
   {
     key: 10,
@@ -152,7 +144,7 @@ const pagingDropDownItems = [
 ];
 const handleSelect = async (item) => {
   await EmployeeAPI.paging({
-    page: page.value,
+    page: 1,
     pageSize: item.key,
   }).then((res) => {
     const data = res.data;
@@ -163,5 +155,17 @@ const handleSelect = async (item) => {
     employees.value = data.items;
   });
 };
+
+watch(page, async (newPage, oldPage) => {
+  if (newPage !== oldPage) {
+    await EmployeeAPI.paging({
+      page: newPage,
+      pageSize: pageSize.value,
+    }).then((res) => {
+      const data = res.data;
+      employees.value = data.items;
+    });
+  }
+});
 </script>
 <style scoped></style>

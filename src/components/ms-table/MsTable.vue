@@ -31,12 +31,17 @@
           </td>
           <td>
             <div class="flex items-center gap-2">
-              <span class="edit" @click="handleEdit(row)">Sửa</span>
+              <span class="edit hover:underline" @click="handleEdit(row)"
+                >Sửa</span
+              >
               <ms-dropdown
                 :drop-down-items="dropDownItems"
                 @select="handleSelect"
-                ><div class="icon icon-more-action"></div
-              ></ms-dropdown>
+              >
+                <div class="w-5 h-5 flex items-center justify-center">
+                  <div class="icon icon-more-action w-3 h-3"></div>
+                </div>
+              </ms-dropdown>
             </div>
           </td>
         </tr>

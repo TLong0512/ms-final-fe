@@ -1,7 +1,7 @@
 <template></template>
 <script setup>
-import { onMounted, watch } from 'vue';
-import { message } from 'ant-design-vue';
+import { onMounted, watch } from "vue";
+import { message } from "ant-design-vue";
 
 /**
  * truyền 2 chiều với cha....
@@ -34,12 +34,16 @@ onMounted(() => {
 
 const showMessageDialog = () => {
   switch (props.messageType) {
-    case 'success': {
-      message.success(props.messageContent ? props.messageContent : 'Thêm thành công');
+    case "success": {
+      message.success(
+        props.messageContent ? props.messageContent : "Thêm thành công"
+      );
       break;
     }
-    case 'error': {
-      message.error(props.messageContent ? props.messageContent : 'Thêm thành công');
+    case "error": {
+      message.error(
+        props.messageContent ? props.messageContent : "Thêm thành công"
+      );
       break;
     }
   }
