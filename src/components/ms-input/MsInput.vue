@@ -3,7 +3,6 @@
     v-model:value="value"
     :placeholder="placeholder"
     ref="inputRef"
-    :class="{ 'input-error': !status }"
     @blur="emit('blur', $event)"
     @focus="emit('focus', $event)"
     @enter="emit('enter', value)"
@@ -11,13 +10,11 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref } from "vue";
 
 const emit = defineEmits(["blur", "focus", "enter"]);
 
 const value = defineModel();
-
-const status = defineModel("status", { default: true });
 
 const props = defineProps({
   placeholder: { type: String, default: "Nhập giá trị" },
@@ -31,14 +28,10 @@ defineExpose({
 });
 </script>
 
-<style scoped>
+<style>
 .ant-input:hover,
 .ant-input:focus {
   border-color: var(--primary-btn-color);
-}
-
-.input-error {
-  border-color: #ff4d4f !important;
 }
 
 .ant-input:focus,
@@ -46,5 +39,12 @@ defineExpose({
 .ant-input:focus-within {
   box-shadow: none !important;
   outline: none !important;
+}
+
+.ant-form-item-has-error .ant-input,
+.ant-form-item-has-error .ant-input:hover,
+.ant-form-item-has-error .ant-input:focus {
+  border-color: #ff4d4f !important;
+  box-shadow: none !important;
 }
 </style>

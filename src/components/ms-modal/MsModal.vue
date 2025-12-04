@@ -36,6 +36,9 @@ defineEmits(["requestClose"]);
 </script>
 
 <style>
+.ant-modal .ant-modal-header {
+  margin-bottom: 16px;
+}
 .ant-modal-close-x {
   display: flex !important;
   align-items: center !important;

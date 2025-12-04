@@ -47,4 +47,10 @@ a.ant-picker-today-btn {
 .ant-picker-dropdown .ant-picker-header-view button:hover {
   color: var(--text-secondary-color) !important;
 }
+/* Error state */
+.ant-form-item-has-error .ant-picker,
+.ant-form-item-has-error .ant-picker:hover,
+.ant-form-item-has-error .ant-picker-focused {
+  border-color: #ff4d4f !important;
+}
 </style>

@@ -1,20 +1,38 @@
-export const isRequired = (value) => {
-  return value !== null && value !== undefined && value !== "";
-};
+export const notFutureDate = (message) => ({
+  validator(_, value) {
+    if (!value) return Promise.resolve();
 
-export const isValidEmail = (email) => {
-  if (!email) return true;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-export const isMinLength = (value, minLength) => {
-  if (!value) return true;
-  return value.length >= minLength;
-};
+    const selectedDate = value.toDate ? value.toDate() : new Date(value);
 
-export const isValidPhone = (phone) => {
-  if (!phone) return true;
-  const phoneRegex = /^[\d\s\-\+\(\)]+$/;
-  return phoneRegex.test(phone);
-};
+    if (selectedDate > today) {
+      return Promise.reject(new Error(message));
+    }
+
+    return Promise.resolve();
+  },
+});
+
+/**
+ * Hàm trả về mô tả lỗi từ backend khi xác thực input của user
+ * @param {*} error
+ * @returns
+ */
+export function extractValidationError(error) {
+  const response = error?.response;
+
+  if (!response || response.status !== 400) return null;
+
+  const errors = response.data?.errors;
+  if (!errors || typeof errors !== "object") return null;
+
+  const firstKey = Object.keys(errors)[0];
+  if (!firstKey) return null;
+
+  const messages = errors[firstKey];
+  if (!Array.isArray(messages) || messages.length === 0) return null;
+
+  return messages[0];
+}

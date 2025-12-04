@@ -1,8 +1,10 @@
 <template>
-  <ms-form ref="formRef" :model="localForm" :rules="rules">
+  <ms-form ref="formRef" :model="localForm" :rules="employeeRules">
     <ms-modal
       :visible="openEmployeeModal"
-      title="Thêm nhân viên"
+      :title="
+        modalMode === 'add' ? 'Thêm nhân viên' : 'Chỉnh sửa thông tin nhân viên'
+      "
       @requestClose="requestClose"
     >
       <template #content>
@@ -15,16 +17,12 @@
               <!-- Employee code + Fullname -->
               <div class="flex gap-2">
                 <!-- Employee code -->
-                <div class="max-w-40 flex flex-col">
+                <div class="flex basis-1/3 flex-col">
                   <label>
                     <span><strong>Mã nhân viên</strong></span>
                     <span class="ml-3 text-red-500 font-bold">*</span>
                   </label>
-                  <ms-form-item
-                    label=""
-                    name="employeeCode"
-                    v-model:status="status.employeeCode"
-                  >
+                  <ms-form-item label="" name="employeeCode">
                     <ms-input
                       ref="employeeCodeInput"
                       v-model="localForm.employeeCode"
@@ -32,20 +30,15 @@
                     />
                   </ms-form-item>
                 </div>
-
                 <!-- Fullname -->
-                <div class="flex flex-col">
+                <div class="flex basis-2/3 flex-1 flex-col">
                   <label>
                     <span><strong>Tên nhân viên</strong></span>
                     <span class="ml-3 text-red-500 font-bold">*</span>
                   </label>
 
-                  <ms-form-item
-                    name="fullName"
-                    v-model:status="status.fullName"
-                  >
+                  <ms-form-item name="fullName">
                     <ms-input
-                      class="w-64"
                       v-model="localForm.fullName"
                       placeholder="Nhập tên nhân viên"
                     />
@@ -60,21 +53,16 @@
                   <span class="ml-3 text-red-500 font-bold">*</span>
                 </label>
 
-                <ms-form-item
-                  name="departmentId"
-                  v-model:status="status.departmentId"
-                >
-                  <ms-combobox
-                    :options="departmentOptions"
-                    v-model="localForm.departmentId"
-                  />
-                </ms-form-item>
+                <ms-combobox
+                  :options="departmentOptions"
+                  v-model="localForm.departmentId"
+                />
               </div>
 
               <!-- Position -->
               <div class="mt-3 flex flex-col">
                 <span><strong>Chức danh</strong></span>
-                <ms-form-item name="position" v-model:status="status.position">
+                <ms-form-item name="position">
                   <ms-input
                     class="w-full"
                     v-model="localForm.position"
@@ -91,11 +79,12 @@
                 <!-- Date of birth -->
                 <div class="flex flex-col">
                   <span><strong>Ngày sinh</strong></span>
-
-                  <ms-date-picker
-                    v-model="localForm.dateOfBirth"
-                    placeholder="Chọn ngày sinh"
-                  />
+                  <ms-form-item name="dateOfBirth">
+                    <ms-date-picker
+                      v-model="localForm.dateOfBirth"
+                      placeholder="Chọn ngày sinh"
+                    />
+                  </ms-form-item>
                 </div>
 
                 <!-- gender -->
@@ -110,40 +99,35 @@
                 </div>
               </div>
 
-              <!-- National card -->
+              <!-- National card + Provided date -->
               <div class="flex mt-3 gap-2">
-                <div class="flex flex-col">
+                <!-- National card id -->
+                <div class="flex basis-2/3 flex-col">
                   <span><strong>Số CMND/CCCD</strong></span>
-                  <ms-form-item
-                    name="nationalCardId"
-                    v-model:status="status.nationalCardId"
-                  >
+                  <ms-form-item name="nationalCardId">
                     <ms-input
-                      class="w-64"
                       v-model="localForm.nationalCardId"
                       placeholder="Nhập số CMND/CCCD"
                     />
                   </ms-form-item>
                 </div>
-
                 <!-- Provided date -->
-                <div class="flex flex-col">
+                <div class="flex basis-1/3 flex-col">
                   <span><strong>Ngày cấp</strong></span>
-                  <ms-date-picker
-                    class="w-full"
-                    v-model="localForm.nationalCardProvidedDate"
-                    placeholder="Chọn ngày cấp"
-                  />
+                  <ms-form-item name="nationalCardProvidedDate">
+                    <ms-date-picker
+                      class="w-full"
+                      v-model="localForm.nationalCardProvidedDate"
+                      placeholder="Chọn ngày cấp"
+                    />
+                  </ms-form-item>
                 </div>
               </div>
 
               <!-- Provided place -->
               <div class="mt-3 w-full">
                 <span><strong>Nơi cấp</strong></span>
-                <ms-form-item
-                  name="nationalCardProvidedPlace"
-                  v-model:status="status.nationalCardProvidedPlace"
-                >
+                <ms-form-item name="nationalCardProvidedPlace">
                   <ms-input
                     class="w-full"
                     v-model="localForm.nationalCardProvidedPlace"
@@ -158,7 +142,7 @@
             <!-- Address -->
             <div>
               <span><strong>Địa chỉ</strong></span>
-              <ms-form-item name="address" v-model:status="status.address">
+              <ms-form-item name="address">
                 <ms-input
                   class="w-full"
                   v-model="localForm.address"
@@ -170,10 +154,7 @@
             <div class="mt-3 flex gap-2">
               <div class="w-52">
                 <span><strong>Số điện thoại</strong></span>
-                <ms-form-item
-                  name="phoneNumber"
-                  v-model:status="status.phoneNumber"
-                >
+                <ms-form-item name="phoneNumber">
                   <ms-input
                     v-model="localForm.phoneNumber"
                     placeholder="Nhập số điện thoại"
@@ -183,10 +164,7 @@
 
               <div class="w-52">
                 <span><strong>Số điện thoại cố định</strong></span>
-                <ms-form-item
-                  name="fixedPhoneNumber"
-                  v-model:status="status.fixedPhoneNumber"
-                >
+                <ms-form-item name="fixedPhoneNumber">
                   <ms-input
                     v-model="localForm.fixedPhoneNumber"
                     placeholder="Nhập số điện thoại cố định"
@@ -196,7 +174,7 @@
 
               <div class="w-60">
                 <span><strong>Email</strong></span>
-                <ms-form-item name="email" v-model:status="status.email">
+                <ms-form-item name="email">
                   <ms-input
                     v-model="localForm.email"
                     placeholder="Nhập email"
@@ -209,10 +187,7 @@
             <div class="mt-3 flex gap-2">
               <div class="w-52">
                 <span><strong>Tài khoản ngân hàng</strong></span>
-                <ms-form-item
-                  name="bankNumber"
-                  v-model:status="status.bankNumber"
-                >
+                <ms-form-item name="bankNumber">
                   <ms-input
                     v-model="localForm.bankNumber"
                     placeholder="Nhập số tài khoản ngân hàng"
@@ -222,7 +197,7 @@
 
               <div class="w-52">
                 <span><strong>Tên ngân hàng</strong></span>
-                <ms-form-item name="bankName" v-model:status="status.bankName">
+                <ms-form-item name="bankName">
                   <ms-input
                     v-model="localForm.bankName"
                     placeholder="Nhập tên ngân hàng"
@@ -232,10 +207,7 @@
 
               <div class="w-60">
                 <span><strong>Chi nhánh</strong></span>
-                <ms-form-item
-                  name="bankBranch"
-                  v-model:status="status.bankBranch"
-                >
+                <ms-form-item name="bankBranch">
                   <ms-input
                     v-model="localForm.bankBranch"
                     placeholder="Nhập chi nhánh ngân hàng"
@@ -296,8 +268,10 @@ import MsFormItem from "@/components/ms-form/MsFormItem.vue";
 import {
   openEmployeeModal,
   openConfirmQuitModal,
+  openErrorModal,
 } from "@/common/constant/modals";
 import { cloneDeep } from "lodash";
+import { employeeRules } from "@/common/constant/form/employeeForm";
 
 /**
  * SECTION ĐỊNH NGHĨA DỮ LIỆU PROPS TỪ CHA, CÁC EMITS VÀ BIẾN CONTROL VALUE CHO FORM
@@ -335,158 +309,9 @@ const departmentOptions = ref([]);
  */
 
 /**
- * status: trạng thái mặc định cho các ô input
- */
-const status = reactive({
-  employeeCode: true,
-  fullName: true,
-  nationalCardId: true,
-  phoneNumber: true,
-  fixedPhoneNumber: true,
-  bankNumber: true,
-  email: true,
-  departmentId: true,
-  nationalCardProvidedPlace: true,
-  bankBranch: true,
-  bankName: true,
-  address: true,
-  position: true,
-});
-
-/**
  * validate form thông qua form ref
  */
 const formRef = ref();
-
-/**
- * watch errror trên field
- */
-watch(
-  () => formRef.value,
-  () => {
-    const validateInfos = formRef.value?.validateInfos;
-    if (validateInfos) {
-      Object.keys(status).forEach((key) => {
-        status[key] = validateInfos[key]?.validateStatus !== "error";
-      });
-    }
-  },
-  { deep: true }
-);
-
-/**
- * Các rule cần validate
- */
-const rules = {
-  employeeCode: [
-    { required: true, message: "Mã nhân viên không được để trống" },
-    {
-      pattern: /^NV\d+$/,
-      message: "Mã nhân viên phải bắt đầu bằng NV, theo sau là số",
-    },
-    {
-      pattern: /^.{1,25}$/,
-      message: "Mã nhân viên tối đa 25 ký tự",
-    },
-  ],
-  fullName: [
-    { required: true, message: "Họ và tên không được để trống" },
-    {
-      pattern: /^[A-Za-zÀ-ỹ\s]+$/,
-      message: "Họ và tên không được chứa số hoặc ký tự đặc biệt",
-    },
-    {
-      pattern: /^.{1,100}$/,
-      message: "Họ tên tối đa 100 ký tự",
-    },
-  ],
-  email: [
-    {
-      type: "email",
-      message: "Email không hợp lệ",
-    },
-    {
-      pattern: /^.{1,100}$/,
-      message: "Email tối đa 100 ký tự",
-    },
-  ],
-  phoneNumber: [
-    {
-      pattern: /^[0-9]+$/,
-      message: "Số điện thoại phải là số",
-    },
-    {
-      pattern: /^.{1,25}$/,
-      message: "Số điện thoại tối đa 25 ký tự",
-    },
-  ],
-  fixedPhoneNumber: [
-    {
-      pattern: /^[0-9]+$/,
-      message: "Số điện thoại cố định phải là số",
-    },
-    {
-      pattern: /^.{1,25}$/,
-      message: "Số điện thoại cố định tối đa 25 ký tự",
-    },
-  ],
-  nationalCardId: [
-    {
-      pattern: /^[0-9]+$/,
-      message: "Mã CMND/CCCD phải là số",
-    },
-    {
-      pattern: /^.{1,25}$/,
-      message: "Số CMND/CCCD tối đa 25 ký tự",
-    },
-  ],
-  bankNumber: [
-    {
-      pattern: /^[0-9]+$/,
-      message: "Số tài khoản ngân hàng phải là số",
-    },
-    {
-      pattern: /^.{1,25}$/,
-      message: "Số tài khoản ngân hàng tối đa 25 ký tự",
-    },
-  ],
-  nationalCardProvidedPlace: [
-    {
-      pattern: /^.{1,255}$/,
-      message: "Nơi cấp CCCD/CMND không vượt quá 255 ký tự",
-    },
-  ],
-  bankBranch: [
-    {
-      pattern: /^.{1,255}$/,
-      message: "Tên chi nhánh không vượt quá 255 ký tự",
-    },
-  ],
-  bankName: [
-    {
-      pattern: /^.{1,255}$/,
-      message: "Tên ngân hàng không vượt quá 255 ký tự",
-    },
-  ],
-  address: [
-    {
-      pattern: /^.{1,255}$/,
-      message: "Địa chỉ không vượt quá 255 ký tự",
-    },
-  ],
-  position: [
-    {
-      pattern: /^.{1,100}$/,
-      message: "Chức vị không vượt quá 100 ký tự",
-    },
-  ],
-  departmentId: [
-    {
-      required: true,
-      message: "Phòng ban không được để trống",
-    },
-  ],
-};
 
 /**
  * END SECTION ĐỊNH NGHĨA CÁC THUỘC TÍNH CHO VALIDATE FORM
@@ -575,29 +400,26 @@ onMounted(async () => {
     key: data.departmentId,
     label: data.name,
   }));
+
+  const clone = cloneDeep(props.formValue);
+  Object.assign(localForm, clone);
+  localForm.genderId = genderOptions.value[0]?.key;
+
   /**
    * Lưu lại giá trị mặc định của form
    */
-  original.value = JSON.stringify(props.formValue);
+  original.value = JSON.stringify(localForm);
   dirty.value = false;
-
-  const clone = cloneDeep(props.formValue);
-
-  Object.assign(localForm, clone);
 });
 
 const handleSave = async () => {
-  try {
-    openConfirmQuitModal.value = false;
-    await formRef.value.validate();
-    emit("save", JSON.parse(JSON.stringify(localForm)));
-  } catch (err) {}
+  openConfirmQuitModal.value = false;
+  await formRef.value.validate();
+  emit("save", cloneDeep(localForm));
 };
 
 const handleSaveAndContinue = async () => {
-  try {
-    await formRef.value.validate();
-    emit("saveAndContinue", JSON.parse(JSON.stringify(localForm)));
-  } catch (err) {}
+  await formRef.value.validate();
+  emit("saveAndContinue", cloneDeep(localForm));
 };
 </script>

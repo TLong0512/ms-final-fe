@@ -1,7 +1,6 @@
 <template>
   <v-autocomplete
     v-model="model"
-    :class="{ 'combobox-error': !status }"
     :items="options"
     :item-title="'label'"
     :item-value="'key'"
@@ -15,23 +14,13 @@
   </v-autocomplete>
 </template>
 <script setup>
-import { watch } from "vue";
-
 const model = defineModel();
-const status = defineModel("status", { default: true });
-
 const props = defineProps({
   options: {
     type: Array,
     required: true,
   },
 });
-
-// watch(model, (newVal) => {
-//   if (newVal) {
-//     status.value = true;
-//   }
-// });
 </script>
 <style>
 #input-v-2-messages {

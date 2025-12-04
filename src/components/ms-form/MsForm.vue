@@ -17,5 +17,6 @@ const formRef = ref(null);
 defineExpose({
   validate: () => formRef.value?.validate(),
   resetFields: () => formRef.value?.resetFields(),
+  setFields: (fields) => formRef.value?.setFields(fields),
 });
 </script>

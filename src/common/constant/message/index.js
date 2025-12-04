@@ -8,3 +8,7 @@ export const messageContent = reactive({
   title: "",
   description: "",
 });
+/**
+ * Biến kiểm soát nội dung error notification
+ */
+export const errorNotificationContent = ref("");

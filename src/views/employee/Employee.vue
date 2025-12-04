@@ -35,10 +35,11 @@
               :placeholder="'Tìm kiếm nhân viên'"
               class="w-56 pr-6"
               v-model="searchValue"
-              @keyup.enter="onSearchEmployee"
+              @keyup.enter="handleSearchEmployee"
             ></ms-input>
             <div
               class="absolute right-3 top-1/2 -translate-y-1/2 icon icon-search"
+              @click="handleSearchEmployee"
             ></div>
           </div>
           <!-- Reset button -->
@@ -49,6 +50,11 @@
                 await setDefaultPage();
               }
             "
+          ></div>
+          <!-- export button -->
+          <div
+            class="icon-export-excel"
+            @click="openConfirmExportExcelFile = true"
           ></div>
         </div>
       </div>
@@ -61,7 +67,7 @@
             :fields="fields"
             :rows="rows"
             row-key="employeeId"
-            @edit="handleEditModeModal"
+            @edit="enableEditModeModal"
             @duplicate="enableDuplicateModeModal"
             @delete="handleConfirmDelete"
             v-model:selectedMap="selectedMap"
@@ -111,7 +117,11 @@
       @save="handleSave"
       @saveAndContinue="handleSaveAndContinue"
     ></employee-modal>
+
+    <!-- Thông báo dạng message -->
     <ms-message></ms-message>
+
+    <!-- Cảnh báo xóa 1 nhân viên -->
     <ms-confimation v-model="openConfirmDeleteModal" :title="'Cảnh báo'">
       <template #icon>
         <div class="icon-warning"></div>
@@ -123,6 +133,43 @@
         </ms-button>
       </template>
     </ms-confimation>
+
+    <!-- Thông báo xuất dữ liệu -->
+    <ms-confimation v-model="openConfirmExportExcelFile" :title="'Xác nhận'">
+      <template #icon>
+        <div class="icon icon-question"></div>
+      </template>
+      <template #content>
+        Tiếp tục tải xuống toàn bộ thông tin nhân viên?
+      </template>
+      <template #functions>
+        <ms-button :btn-type="'primary'" @click="handleExportExcel">
+          <template #icon></template>
+          <template #content>Tiếp tục tải xuống</template>
+        </ms-button>
+      </template>
+    </ms-confimation>
+
+    <!-- Thông báo lỗi -->
+    <ms-error-notification v-model="openErrorModal">
+      <template #icon>
+        <div class="icon-error"></div>
+      </template>
+      <template #content>
+        {{ errorNotificationContent }}
+      </template>
+      <template #confirm>
+        <a-button
+          type="primary"
+          @click="
+            openErrorModal = false;
+            errorNotificationContent = '';
+          "
+        >
+          Xác nhận
+        </a-button>
+      </template>
+    </ms-error-notification>
   </div>
 </template>
 
@@ -149,6 +196,8 @@ import { selectAllFunctionItems } from "@/common/constant/combobox/select-all/se
 import {
   openEmployeeModal,
   openConfirmDeleteModal,
+  openErrorModal,
+  openConfirmExportExcelFile,
 } from "@/common/constant/modals";
 import {
   rows,
@@ -160,7 +209,15 @@ import {
 import { searchValue } from "@/common/constant/searchbox";
 import { selectedMap } from "@/common/constant/tables";
 import { employeeModel } from "@/common/model/employee";
-import dayjs from "dayjs";
+import MsErrorNotification from "@/components/ms-notification/MsErrorNotification.vue";
+import { extractValidationError } from "@/utils/validator";
+import { errorNotificationContent } from "@/common/constant/message";
+import { departmentRequireMessage } from "@/common/constant/form/employeeForm";
+import {
+  openMessage,
+  messageType,
+  messageContent,
+} from "@/common/constant/message";
 
 /**
  * Dữ liệu cho form
@@ -234,10 +291,15 @@ const handlePageSize = async (item) => {
   });
 };
 
+/**
+ * Hàm xử lý các chức năng ở dropdown khi select all dữ liệu
+ * @param item
+ */
 const handleSelectAllFunctions = async (item) => {
   switch (item.key) {
     case "deleteAll":
-      await handleDeleteAll(selectedIds);
+      handleConfirmDelete(selectedIds.value);
+      break;
   }
 };
 
@@ -254,34 +316,39 @@ watch(page, async (newPage, oldPage) => {
   }
 });
 
-const currentRowsToDelete = ref([]);
+const currentIdsToDelete = ref([]);
 
-const handleConfirmDelete = (row) => {
-  currentRowsToDelete.value.push(row);
+const handleConfirmDelete = (item) => {
+  if (Array.isArray(item)) {
+    currentIdsToDelete.value = [...item];
+  } else {
+    currentIdsToDelete.value = [item.employeeId];
+  }
   openConfirmDeleteModal.value = true;
 };
 
 const handleDelete = async () => {
-  if (currentRowsToDelete.value.length === 0) return;
-
   try {
-    await EmployeeAPI.delete(currentRowsToDelete.value[0].employeeId);
-    showDefaultSuccessMessage();
-    await setDefaultPage();
+    if (currentIdsToDelete.value.length === 0) return;
+    else if (currentIdsToDelete.value.length === 1) {
+      await EmployeeAPI.delete(currentIdsToDelete.value[0]);
+      showDefaultSuccessMessage();
+    } else {
+      await EmployeeAPI.deleteBatch(currentIdsToDelete.value);
+      showDefaultSuccessMessage();
+    }
   } catch (error) {
-    showDefaultErrorMessage();
   } finally {
+    await setDefaultPage();
     openConfirmDeleteModal.value = false;
-    currentRowsToDelete.value = [];
+    currentIdsToDelete.value = [];
   }
 };
-
-const handleDeleteAll = async (ids) => {};
 
 /**
  * Call api search
  */
-const onSearchEmployee = async () => {
+const handleSearchEmployee = async () => {
   await fetchEmployees({ resetSelected: true });
 };
 
@@ -339,7 +406,7 @@ const enableAddModeModal = async () => {
  * Hàm hiển thị modal dưới edit mode
  * @param row
  */
-const handleEditModeModal = async (row) => {
+const enableEditModeModal = async (row) => {
   await handleGetEmplInforById(row);
   edditedEmplId.value = row.employeeId;
   modalMode.value = "edit";
@@ -394,14 +461,19 @@ const edditedEmplId = ref(null);
 
 const addEmployee = async () => {
   try {
-    const payload = JSON.stringify({
+    const body = {
       ...formValue,
-      nationalCardProvidedDate: convertToLocalDate(
-        formValue.nationalCardProvidedDate
-      ),
-      dateOfBirth: convertToLocalDate(formValue.dateOfBirth),
-    });
-    await EmployeeAPI.post(payload);
+      nationalCardProvidedDate:
+        formValue.nationalCardProvidedDate !== null
+          ? convertToLocalDate(formValue.nationalCardProvidedDate)
+          : null,
+      dateOfBirth:
+        formValue.dateOfBirth !== null
+          ? convertToLocalDate(formValue.dateOfBirth)
+          : null,
+    };
+
+    await EmployeeAPI.post(body);
   } catch (error) {
     throw error;
   }
@@ -410,13 +482,17 @@ const addEmployee = async () => {
 const editEmployee = async () => {
   try {
     const id = edditedEmplId.value;
-    const payload = JSON.stringify({
+    const payload = {
       ...formValue,
-      nationalCardProvidedDate: convertToLocalDate(
-        formValue.nationalCardProvidedDate
-      ),
-      dateOfBirth: convertToLocalDate(formValue.dateOfBirth),
-    });
+      nationalCardProvidedDate:
+        formValue.nationalCardProvidedDate !== null
+          ? convertToLocalDate(formValue.nationalCardProvidedDate)
+          : null,
+      dateOfBirth:
+        formValue.dateOfBirth != null
+          ? convertToLocalDate(formValue.dateOfBirth)
+          : null,
+    };
     await EmployeeAPI.update(id, payload);
   } catch (error) {
     throw error;
@@ -432,7 +508,16 @@ const handleSave = async (data) => {
         openEmployeeModal.value = false;
         showDefaultSuccessMessage();
       } catch (error) {
-        showDefaultErrorMessage();
+        if (formValue.departmentId === null) {
+          errorNotificationContent.value = departmentRequireMessage;
+          openErrorModal.value = true;
+        } else {
+          const message = extractValidationError(error);
+          if (message) {
+            errorNotificationContent.value = message;
+            openErrorModal.value = true;
+          }
+        }
       } finally {
         break;
       }
@@ -444,21 +529,72 @@ const handleSave = async (data) => {
         openEmployeeModal.value = false;
         showDefaultSuccessMessage();
       } catch (error) {
-        showDefaultErrorMessage();
+        if (formValue.departmentId === null) {
+          errorNotificationContent.value = departmentRequireMessage;
+          openErrorModal.value = true;
+        } else {
+          const message = extractValidationError(error);
+          if (message) {
+            errorNotificationContent.value = message;
+            openErrorModal.value = true;
+          }
+        }
       } finally {
         break;
       }
   }
 };
+/**
+ *
+ * @param data
+ */
 const handleSaveAndContinue = async (data) => {
   Object.assign(formValue, data);
   try {
     await addEmployee();
     showDefaultSuccessMessage();
+    openEmployeeModal.value = false;
     await enableAddModeModal();
     await setDefaultPage();
   } catch (error) {
-    showDefaultErrorMessage();
+    if (formValue.departmentId === null) {
+      errorNotificationContent.value = departmentRequireMessage;
+      openErrorModal.value = true;
+    } else {
+      const message = extractValidationError(error);
+      if (message) {
+        errorNotificationContent.value = message;
+        openErrorModal.value = true;
+      }
+    }
+  }
+};
+
+/**
+ *
+ */
+const handleExportExcel = async () => {
+  try {
+    const res = await EmployeeAPI.exportAllDataToExcel();
+
+    const blob = new Blob([res.data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Employee.xlsx";
+    link.click();
+    window.URL.revokeObjectURL(url);
+    showDefaultSuccessMessage();
+  } catch (error) {
+    openMessage.value = true;
+    messageContent.title = "Lỗi";
+    messageContent.description =
+      "Đã xảy ra lỗi trong quá trình xuất file, vui lòng thử lại sau";
+    messageType.value = "error";
+  } finally {
+    openConfirmExportExcelFile.value = false;
   }
 };
 </script>

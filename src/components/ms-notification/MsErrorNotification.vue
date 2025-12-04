@@ -1,17 +1,14 @@
 <template>
   <a-modal v-model:open="open" :title="title" centered destroy-on-close>
-    <div class="flex items-center p-4">
+    <div class="flex items-center p-4 gap-3">
       <slot name="icon"></slot>
       <div class="flex justify-center flex-1 min-w-0 min-h-0 text-base">
         <slot name="content"></slot>
       </div>
     </div>
     <template #footer>
-      <div class="flex justify-between items-center">
-        <a-button @click="handleCancel">Hủy</a-button>
-        <div class="gap-3 flex">
-          <slot name="functions"></slot>
-        </div>
+      <div class="flex justify-center items-center">
+        <slot name="confirm"></slot>
       </div>
     </template>
   </a-modal>
@@ -25,8 +22,4 @@ const props = defineProps({
     default: "Thông báo",
   },
 });
-
-const handleCancel = () => {
-  open.value = false;
-};
 </script>

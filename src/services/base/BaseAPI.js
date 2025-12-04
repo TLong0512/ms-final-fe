@@ -46,13 +46,34 @@ export default class BaseAPI {
     return api.delete(`${this.controler}/${id}`);
   }
   /**
-   * Hàm xuất dữ liệu
-   * @param {*} ids : danh sách id cần xuất csv
+   *Hàm xóa mọt loạt bản ghi
+   * @param {*} ids
    * @returns
    */
-  exportToCSV(ids = {}) {
-    return api.get(`${this.controler}/export`, {
+  deleteBatch(ids) {
+    return api.delete(`${this.controler}/by-batch`, {
+      data: ids,
+      ...jsonType,
+    });
+  }
+
+  /**
+   * Hàm xuất dữ liệu
+   * @param {*} ids : danh sách id cần xuất excel
+   * @returns
+   */
+  exportListDataToExcel(ids = {}) {
+    return api.get(`${this.controler}/export-excel`, {
       params: { ids },
+      responseType: "blob",
+    });
+  }
+  /**
+   *
+   * @returns
+   */
+  exportAllDataToExcel() {
+    return api.get(`${this.controler}/export-excel`, {
       responseType: "blob",
     });
   }
