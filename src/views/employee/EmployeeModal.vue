@@ -223,14 +223,14 @@
 
       <template #functions>
         <template v-if="modalMode === 'add'">
-          <a-button @click="handleSave">Lưu</a-button>
+          <a-button @click="handleSave">Cất</a-button>
           <a-button type="primary" @click="handleSaveAndContinue">
-            Lưu và tiếp tục
+            Cất và tiếp tục
           </a-button>
         </template>
 
         <template v-else>
-          <a-button @click="handleSave" type="primary">Lưu</a-button>
+          <a-button @click="handleSave" type="primary">Cất</a-button>
         </template>
       </template>
     </ms-modal>
