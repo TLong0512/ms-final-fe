@@ -19,5 +19,7 @@
 :root {
   --icon-primary-color: #7a8188;
   --icon-secondary-color: #ffffff;
+  --icon-third-color: #b6bac2;
+  --icon-fourth-color: #2ba11b;
   --icon-hover-color: white;
 }

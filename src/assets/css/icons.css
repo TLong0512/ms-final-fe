@@ -30,6 +30,7 @@
   mask-position: -992px -360px;
   height: 16px;
   width: 16px;
+  background-color: var(--icon-third-color);
 }
 
 .icon-more {
@@ -623,6 +624,10 @@
 .icon-reset {
   mask-image: url("../icons/ICON-2.svg");
   mask-position: -423px -201px;
+  background-color: var(--icon-third-color);
+}
+.icon-reset:hover {
+  background-color: var(--primary-btn-color);
 }
 .icon-more-action {
   mask-image: url("../icons/ICON-2.svg");
@@ -630,4 +635,17 @@
   width: 10px;
   height: 8px;
   background-color: var(--primary-btn-color);
+}
+.icon-question {
+  mask-image: url("../icons/ICON-2.svg");
+  mask-position: -3846px -403px;
+  width: 27px;
+  height: 26px;
+  background-color: var(--icon-fourth-color);
+}
+.icon-warning {
+  background-image: url("../icons/ICON-2.svg");
+  background-position: -593px -146px;
+  width: 22px;
+  height: 21px;
 }

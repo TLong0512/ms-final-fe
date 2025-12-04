@@ -1,29 +1,91 @@
 <template>
-  <a-select
+  <v-autocomplete
     v-model="model"
-    :options="options"
-    show-search
-    :placeholder="placeholder"
-    :filter-option="filterOption"
-    class="w-full cursor-pointer"
-  />
+    :class="{ 'combobox-error': !status }"
+    :items="options"
+    :item-title="'label'"
+    :item-value="'key'"
+    density="compact"
+  >
+    <template #no-data>
+      <div class="m-5 flex items-center justify-center">
+        <strong>Không có dữ liệu</strong>
+      </div>
+    </template>
+  </v-autocomplete>
 </template>
-
 <script setup>
-/**
- * placeholder: gợi ý
- * option: danh sách các giá trị
- */
-const props = defineProps({
-  placeholder: { type: String, default: 'Chọn...' },
-  options: { type: Array, default: () => [] },
-});
-/**
- * binding 2 chiều với dữ liệu được chọn
- */
-const model = defineModel({ type: [String, Number, Object, Boolean, Array] });
+import { watch } from "vue";
 
-const filterOption = (input, option) => {
-  return option.label.toLowerCase().includes(input.toLowerCase());
-};
+const model = defineModel();
+const status = defineModel("status", { default: true });
+
+const props = defineProps({
+  options: {
+    type: Array,
+    required: true,
+  },
+});
+
+// watch(model, (newVal) => {
+//   if (newVal) {
+//     status.value = true;
+//   }
+// });
 </script>
+<style>
+#input-v-2-messages {
+  display: none;
+}
+.v-input__details {
+  display: none !important;
+}
+
+.v-autocomplete .v-field {
+  height: 32px !important;
+  min-height: 32px !important;
+  border: 1px solid #d9d9d9 !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  background-color: #fff !important;
+  transition: all 0.2s ease !important;
+}
+
+.v-autocomplete .v-field__input {
+  padding: 0 11px !important;
+  font-size: 14px !important;
+  line-height: 32px !important;
+  min-height: 32px !important;
+}
+
+.v-autocomplete .v-field:hover {
+  border-color: var(--primary-btn-color) !important;
+}
+
+.v-autocomplete .v-field.v-field--focused {
+  border-color: --primary-btn-color !important;
+}
+
+.v-autocomplete input::placeholder {
+  font-size: 14px !important;
+}
+
+.v-autocomplete .v-field__outline {
+  display: none !important;
+}
+
+.v-autocomplete .v-field__append-inner {
+  height: 32px !important;
+}
+
+.v-autocomplete .v-field__input,
+.v-autocomplete .v-field,
+.v-autocomplete input,
+.v-field--variant-filled .v-field__overlay {
+  background-color: transparent !important;
+}
+
+.combobox-error .v-input .v-field {
+  border: 1px solid red !important;
+}
+</style>

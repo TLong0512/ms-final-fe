@@ -24,7 +24,7 @@ html {
   margin: 0;
   box-sizing: border-box;
   color: var(--text-primary-color);
-  font-size: 13px;
+  font-size: 14px;
   scroll-behavior: smooth;
 }
 body::-webkit-scrollbar {
@@ -36,5 +36,20 @@ body::-webkit-scrollbar {
 }
 .main-content {
   background-color: var(--bg-primary-color);
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #c0c0c0;
+  border-radius: 3px;
 }
 </style>

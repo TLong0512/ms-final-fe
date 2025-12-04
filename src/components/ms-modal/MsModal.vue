@@ -1,36 +1,51 @@
 <template>
-  <div>
-    <a-modal v-model:open="showModal" :title="title" @cancel="handleCancel" destroy-on-close>
-      <slot name="content"></slot>
-      <template #footer>
-        <a-button @click="handleCancel"><slot name="cancel"></slot></a-button>
-        <a-button type="primary" @click="handleSave"><slot name="save"></slot></a-button>
-      </template>
-    </a-modal>
-  </div>
+  <a-modal
+    :open="visible"
+    :title="title"
+    :width="width"
+    :mask-closable="false"
+    :keyboard="false"
+    destroy-on-close
+    centered
+    @cancel="$emit('requestClose')"
+  >
+    <slot name="content" />
+
+    <template #footer>
+      <div class="flex justify-between">
+        <a-button @click="$emit('requestClose')">
+          <slot name="cancel"></slot>
+        </a-button>
+        <div class="flex gap-3">
+          <slot name="functions"></slot>
+        </div>
+      </div>
+    </template>
+  </a-modal>
 </template>
+
 <script setup>
-import { showModal } from '@/common/constant/component-variables';
-
-const props = defineProps({
-  title: {
-    type: String,
-    required: true,
-  },
+defineProps({
+  visible: { type: Boolean, required: true },
+  title: { type: String, required: true },
+  width: { type: [String, Number], default: 900 },
+  saving: { type: Boolean, default: false },
 });
-const emit = defineEmits(['save', 'cancel']);
 
-const handleSave = () => {
-  emit('save');
-};
-const handleCancel = () => {
-  emit('cancel');
-};
+defineEmits(["requestClose"]);
 </script>
+
 <style>
 .ant-modal-close-x {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+.ant-modal-title {
+  font-size: x-large !important;
+  font-weight: bolder !important;
+}
+.ant-modal-footer {
+  margin-top: 25px !important;
 }
 </style>

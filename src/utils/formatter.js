@@ -1,4 +1,21 @@
 /**
+ * Hàm chung handle format
+ * @param value giá trị cần format
+ * @param type loại áp dụng
+ */
+export const handleFormat = (value, type) => {
+  switch (type) {
+    case "number":
+      return formatNumber(value);
+    case "date":
+      return formatDate(value);
+    case "text":
+      return formatText(value);
+    default:
+      return formatText(value);
+  }
+};
+/**
  * Hàm định dạng số
  * @param {*} value
  * @returns

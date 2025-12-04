@@ -1,51 +1,70 @@
 <template></template>
 <script setup>
-import { onMounted, watch } from "vue";
-import { message } from "ant-design-vue";
+import { message, notification } from "ant-design-vue";
+import { watch, ref } from "vue";
+import {
+  openMessage,
+  messageContent,
+  messageType,
+} from "@/common/constant/message";
 
-/**
- * truyền 2 chiều với cha....
- */
-const showMessage = defineModel();
-
-/**
- * Props:
- *  1. message type: loại message sẽ hiển thị: success, error
- *  2. message content: nội dung của message
- */
-const props = defineProps({
-  messageType: {
-    type: String,
-    required: true,
-  },
-  messageContent: {
-    type: String,
-  },
-});
-
-onMounted(() => {
-  showMessageDialog();
-});
-
-// watch(showMessage, () => {
-//   showMessageDialog();
-//   showMessage.val = false;
-// });
-
-const showMessageDialog = () => {
-  switch (props.messageType) {
-    case "success": {
-      message.success(
-        props.messageContent ? props.messageContent : "Thêm thành công"
-      );
-      break;
-    }
-    case "error": {
-      message.error(
-        props.messageContent ? props.messageContent : "Thêm thành công"
-      );
-      break;
-    }
+const openNotification = () => {
+  notification.open({
+    message: () => messageContent.title,
+    description: () => messageContent.description,
+    class: getNotificationClass(),
+    duration: 3,
+    onClose: () => {
+      openMessage.value = false;
+      messageType.value = null;
+      messageContent.title = "";
+      message.description = "";
+    },
+    placement: "bottomRight",
+  });
+};
+const getNotificationClass = () => {
+  switch (messageType.value) {
+    case "success":
+      return "success-msg";
+    case "warning":
+      return "warning-msg";
+    case "error":
+      return "error-msg";
   }
 };
+
+watch(openMessage, (val) => {
+  if (val) {
+    openNotification();
+  }
+});
 </script>
+<style>
+.notification-custom-class {
+  background-color: red !important;
+}
+.ant-notification-notice .ant-notification-notice-close {
+  display: none !important;
+}
+
+.success-msg {
+  background-color: #22c55e !important;
+}
+
+.warning-msg {
+  background-color: #eab308 !important;
+}
+
+.error-msg {
+  background-color: #ef4444 !important;
+}
+.success-msg .ant-notification-notice-message,
+.success-msg .ant-notification-notice-description,
+.warning-msg .ant-notification-notice-message,
+.warning-msg .ant-notification-notice-description,
+.error-msg .ant-notification-notice-message,
+.error-msg .ant-notification-notice-description {
+  color: #fff !important;
+}
+</style>

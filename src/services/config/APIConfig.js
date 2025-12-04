@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-const baseURL = 'https://localhost:8000';
+const baseURL = "https://localhost:8000";
 
 let api = axios.create({
   baseURL: baseURL,
@@ -14,7 +14,7 @@ api.interceptors.response.use(
       // handle error
     }
     return Promise.reject(error);
-  },
+  }
 );
 
 export default api;

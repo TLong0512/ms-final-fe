@@ -30,7 +30,7 @@
 <script setup>
 import MsDropdown from "@/components/ms-dropdown/MsDropdown.vue";
 import avatar from "@/assets/images/default-avatar.png";
-import { headerUtils } from "@/common/constant/header/headerUtils";
+import { headerUtils } from "@/common/constant/combobox/header";
 </script>
 
 <style scoped>

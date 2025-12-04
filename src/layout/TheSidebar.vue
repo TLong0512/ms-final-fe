@@ -57,7 +57,7 @@
   </div>
 </template>
 <script setup>
-import { sidebarItems } from "@/common/constant/sidebar/sidebarItems";
+import { sidebarItems } from "@/common/constant/combobox/sidebar/sidebarItems";
 import { ref } from "vue";
 import { useRoute } from "vuetify/lib/composables/router";
 
