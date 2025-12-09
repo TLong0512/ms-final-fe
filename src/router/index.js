@@ -1,5 +1,5 @@
 import NotFound from "@/views/not-found/NotFound.vue";
-import Employee from "@/views/employee/Employee.vue";
+import EmployeeMain from "@/views/employee/EmployeeMain.vue";
 import { createRouter, createWebHistory } from "vue-router";
 
 const router = createRouter({
@@ -11,7 +11,7 @@ const router = createRouter({
     },
     {
       path: "/employee",
-      component: Employee,
+      component: EmployeeMain,
     },
     {
       path: "/:pathMatch(.*)*",

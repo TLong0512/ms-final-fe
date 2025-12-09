@@ -273,66 +273,66 @@ import {
 import { cloneDeep } from "lodash";
 import { employeeRules } from "@/common/constant/form/employeeForm";
 
+// #region Props & Emits
 /**
- * SECTION ĐỊNH NGHĨA DỮ LIỆU PROPS TỪ CHA, CÁC EMITS VÀ BIẾN CONTROL VALUE CHO FORM
- */
-
-/**
- * 1. formValue: reactive từ parent
- * 2. mode: mode của modal
+ * Props từ component cha
+ * @property {Object} formValue - Dữ liệu form từ parent component
+ * @property {string} modalMode - Chế độ modal: 'add' hoặc 'edit'
  */
 const props = defineProps({
   formValue: Object,
   modalMode: String,
 });
+
 /**
- * emit sự kiện
+ * Emit các sự kiện
  */
 const emit = defineEmits(["save", "saveAndContinue"]);
+// #endregion Props & Emits
 
+// #region State Data
+/**
+ * Dữ liệu form cục bộ (local reactive)
+ */
 const localForm = reactive({});
 
 /**
- * Danh sách lựa chọn trong form
- * 1. danh sách gender
- * 2. danh sách department
+ * Danh sách giới tính từ API
  */
 const genderOptions = ref([]);
+
+/**
+ * Danh sách đơn vị từ API
+ */
 const departmentOptions = ref([]);
 
 /**
- * END SECTION ĐỊNH NGHĨA DỮ LIỆU PROPS TỪ CHA, CÁC EMITS VÀ BIẾN CONTROL VALUE CHO FORM
- */
-
-/**
- * SECTION ĐỊNH NGHĨA CÁC THUỘC TÍNH CHO VALIDATE FORM
- */
-
-/**
- * validate form thông qua form ref
- */
-const formRef = ref();
-
-/**
- * END SECTION ĐỊNH NGHĨA CÁC THUỘC TÍNH CHO VALIDATE FORM
- */
-
-/**
- * END SECTION CHECK LƯU LẠI GIÁ TRỊ BAN ĐẦU CỦA FORM, CHECK DIRTY , LOGIC DIRTY
- */
-
-/**
- * Biến kiểm tra logic dirty
- * 1. original: giữ dữ liệu init form
- * 2. dirty: kiểm tra thay đổi dữ liệu so với init
+ * Giá trị ban đầu của form (lưu để kiểm tra dirty)
  */
 const original = ref(null);
+
+/**
+ * Cờ kiểm tra xem form có thay đổi hay không
+ */
 const dirty = ref(false);
 
 /**
- * Kiểm tra dirty
+ * Ref để focus vào input mã nhân viên
  */
+const employeeCodeInput = ref(null);
 
+/**
+ * Ref để validate form
+ */
+const formRef = ref();
+// #endregion State Data
+
+// #region Methods - Xử lý form validation và dirty check
+/**
+ * Hàm kiểm tra xem form đã thay đổi hay không (watch dependency)
+ * @returns {void}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
 watch(
   () => localForm,
   () => {
@@ -343,6 +343,12 @@ watch(
   { deep: true }
 );
 
+/**
+ * Hàm xử lý yêu cầu đóng modal
+ * Nếu form chưa thay đổi thì đóng ngay, nếu đã thay đổi thì hiển thị confirmation
+ * @returns {void}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
 const requestClose = () => {
   if (!dirty.value) {
     openEmployeeModal.value = false;
@@ -351,75 +357,105 @@ const requestClose = () => {
   }
 };
 
+/**
+ * Hàm xử lý khi user chọn không lưu khi đóng modal
+ * @returns {void}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
 const handleQuit = () => {
   openEmployeeModal.value = false;
   openConfirmQuitModal.value = false;
-  return;
 };
 
 /**
- * END SECTION CHECK LƯU LẠI GIÁ TRỊ BAN ĐẦU CỦA FORM, CHECK DIRTY , LOGIC DIRTY
+ * Hàm xử lý lưu thông tin nhân viên
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
  */
-
-/**
- * SECTION LOGIC KHÁC
- */
-
-/**
- * Biển hiện focus tại vị trí employee code
- */
-const employeeCodeInput = ref(null);
-
-/**
- * SECTION LOGIC KHÁC
- */
-
-/**
- * Call APIS khi mounted component
- *
- */
-onMounted(async () => {
-  /**
-   * Focus vào ô employee code khi mở trang
-   */
-  employeeCodeInput.value?.focus();
-  /**
-   * Call api get all gender và department
-   */
-  const [genderRes, departmentRes] = await Promise.all([
-    GenderAPI.getAll(),
-    DepartmentAPI.getAll(),
-  ]);
-
-  genderOptions.value = genderRes.data.map((data) => ({
-    key: data.genderId,
-    name: data.name,
-  }));
-
-  departmentOptions.value = departmentRes.data.map((data) => ({
-    key: data.departmentId,
-    label: data.name,
-  }));
-
-  const clone = cloneDeep(props.formValue);
-  Object.assign(localForm, clone);
-  localForm.genderId = genderOptions.value[0]?.key;
-
-  /**
-   * Lưu lại giá trị mặc định của form
-   */
-  original.value = JSON.stringify(localForm);
-  dirty.value = false;
-});
-
 const handleSave = async () => {
   openConfirmQuitModal.value = false;
   await formRef.value.validate();
   emit("save", cloneDeep(localForm));
 };
 
+/**
+ * Hàm xử lý lưu và tiếp tục thêm nhân viên mới
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
 const handleSaveAndContinue = async () => {
   await formRef.value.validate();
   emit("saveAndContinue", cloneDeep(localForm));
 };
+// #endregion Methods - Xử lý form validation và dirty check
+
+// #region Methods - Xử lý dữ liệu từ API
+/**
+ * Hàm khởi tạo dữ liệu danh sách giới tính từ API
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
+const initGenderOptions = async () => {
+  try {
+    const genderRes = await GenderAPI.getAll();
+    genderOptions.value = genderRes.data.map((data) => ({
+      key: data.genderId,
+      name: data.name,
+    }));
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách giới tính:", error);
+  }
+};
+
+/**
+ * Hàm khởi tạo dữ liệu danh sách đơn vị từ API
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
+const initDepartmentOptions = async () => {
+  try {
+    const departmentRes = await DepartmentAPI.getAll();
+    departmentOptions.value = departmentRes.data.map((data) => ({
+      key: data.departmentId,
+      label: data.name,
+    }));
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách đơn vị:", error);
+  }
+};
+
+/**
+ * Hàm khởi tạo dữ liệu form từ props
+ * @returns {void}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
+const initFormData = () => {
+  const clone = cloneDeep(props.formValue);
+  Object.assign(localForm, clone);
+  localForm.genderId = genderOptions.value[0]?.key;
+
+  // Lưu lại giá trị mặc định của form
+  original.value = JSON.stringify(localForm);
+  dirty.value = false;
+};
+// #endregion Methods - Xử lý dữ liệu từ API
+
+// #region Lifecycle Hooks
+/**
+ * Hook chạy khi component được mount
+ * - Focus vào ô mã nhân viên
+ * - Lấy dữ liệu giới tính và đơn vị từ API
+ * - Khởi tạo dữ liệu form
+ */
+onMounted(async () => {
+  // Focus vào ô employee code khi mở trang
+  employeeCodeInput.value?.focus();
+
+  // Lấy dữ liệu từ API
+  await Promise.all([initGenderOptions(), initDepartmentOptions()]);
+
+  // Khởi tạo dữ liệu form
+  initFormData();
+});
+// #endregion Lifecycle Hooks
 </script>

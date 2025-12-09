@@ -227,22 +227,43 @@ import {
   messageContent,
 } from "@/common/constant/message";
 import MsExportColumnModal from "@/components/ms-modal/ms-functional-modal/MsExportColumnModal.vue";
+
+// #region State Data
 /**
- * Dữ liệu cho form
+ * Dữ liệu cho form modal
  */
 const formValue = employeeModel();
 
-const setDefaultPage = async () => {
-  searchValue.value = "";
-  page.value = 1;
-  pageSize.value = 10;
-  await fetchEmployees({
-    pageValue: page.value,
-    pageSizeValue: pageSize.value,
-    resetSelected: true,
-  });
-};
+/**
+ * ID của nhân viên đang được chỉnh sửa
+ */
+const edditedEmplId = ref(null);
 
+/**
+ * Chế độ modal: 'add', 'edit'
+ */
+const modalMode = ref(null);
+
+/**
+ * Mảng ID của nhân viên cần xóa
+ */
+const currentIdsToDelete = ref([]);
+
+/**
+ * Các cột được chọn để xuất excel
+ */
+const columnsToExport = ref([]);
+// #endregion State Data
+
+// #region Methods - Xử lý trang (Pagination & Search)
+/**
+ * Hàm lấy danh sách nhân viên từ API
+ * @param {number} pageValue - Số trang
+ * @param {number} pageSizeValue - Số bản ghi trên trang
+ * @param {boolean} resetSelected - Có reset lựa chọn hay không
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
 const fetchEmployees = async ({
   pageValue = page.value,
   pageSizeValue = pageSize.value,
@@ -283,13 +304,27 @@ const fetchEmployees = async ({
 };
 
 /**
- * Call api khi mount trang
+ * Hàm đặt lại trang về mặc định (trang 1, 10 bản ghi, xóa tìm kiếm)
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
  */
-onMounted(async () => await fetchEmployees());
+const setDefaultPage = async () => {
+  searchValue.value = "";
+  page.value = 1;
+  pageSize.value = 10;
+  await fetchEmployees({
+    pageValue: page.value,
+    pageSizeValue: pageSize.value,
+    resetSelected: true,
+  });
+};
 
 /**
- * Hàm call lại api get employee khi lựa chọn lại pageSize
- * @param item object item được chọn
+ * Hàm xử lý thay đổi số bản ghi trên trang
+ * @param {Object} item - Item được chọn từ dropdown
+ * @param {number} item.key - Số bản ghi được chọn
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
  */
 const handlePageSize = async (item) => {
   await fetchEmployees({
@@ -300,82 +335,20 @@ const handlePageSize = async (item) => {
 };
 
 /**
- * Hàm xử lý các chức năng ở dropdown khi select all dữ liệu
- * @param item
- */
-const handleSelectAllFunctions = async (item) => {
-  switch (item.key) {
-    case "deleteAll":
-      handleConfirmDelete(selectedIds.value);
-      break;
-  }
-};
-
-/**
- * Watch call lại api lấy dữ liệu khi chuyển trang
- */
-watch(page, async (newPage, oldPage) => {
-  try {
-    if (newPage !== oldPage) {
-      await fetchEmployees();
-    }
-  } catch {
-    rows.value = [];
-  }
-});
-
-const currentIdsToDelete = ref([]);
-
-const handleConfirmDelete = (item) => {
-  if (Array.isArray(item)) {
-    currentIdsToDelete.value = [...item];
-  } else {
-    currentIdsToDelete.value = [item.employeeId];
-  }
-  openConfirmDeleteModal.value = true;
-};
-
-const handleDelete = async () => {
-  try {
-    if (currentIdsToDelete.value.length === 0) return;
-    else if (currentIdsToDelete.value.length === 1) {
-      await EmployeeAPI.delete(currentIdsToDelete.value[0]);
-      showDefaultSuccessMessage();
-    } else {
-      await EmployeeAPI.deleteBatch(currentIdsToDelete.value);
-      showDefaultSuccessMessage();
-    }
-  } catch (error) {
-  } finally {
-    await setDefaultPage();
-    openConfirmDeleteModal.value = false;
-    currentIdsToDelete.value = [];
-  }
-};
-
-/**
- * Call api search
+ * Hàm xử lý tìm kiếm nhân viên theo từ khóa
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
  */
 const handleSearchEmployee = async () => {
   await fetchEmployees({ resetSelected: true });
 };
+// #endregion Methods - Xử lý trang
 
+// #region Methods - Xử lý form và modal
 /**
- * Section Xử lý logic select, select all
- */
-
-const selectedIds = computed(() =>
-  Object.keys(selectedMap.value).filter((id) => selectedMap.value[id])
-);
-
-/**
- * Section xử lý form ở các mode
- */
-
-const modalMode = ref(null);
-
-/**
- * function clear form ở mode add
+ * Hàm xóa dữ liệu form về trạng thái ban đầu
+ * @returns {void}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
  */
 const resetForm = () => {
   formValue.employeeCode = "";
@@ -395,46 +368,13 @@ const resetForm = () => {
   formValue.bankName = "";
   formValue.bankBranch = "";
 };
-/**
- * Hàm hiển thị modal add mode
- */
-const enableAddModeModal = async () => {
-  try {
-    resetForm();
-    const newEmplCode = await EmployeeAPI.generateEmplCode();
-
-    formValue.employeeCode = newEmplCode.data;
-    modalMode.value = "add";
-    openEmployeeModal.value = true;
-  } catch (error) {
-    showDefaultErrorMessage();
-  }
-};
-/**
- * Hàm hiển thị modal dưới edit mode
- * @param row
- */
-const enableEditModeModal = async (row) => {
-  await handleGetEmplInforById(row);
-  edditedEmplId.value = row.employeeId;
-  modalMode.value = "edit";
-  openEmployeeModal.value = true;
-};
-/**
- * Hàm hiển thị modal dưới duplicate mode
- * @param row
- */
-const enableDuplicateModeModal = async (row) => {
-  await handleGetEmplInforById(row);
-  const newEmplCode = (await EmployeeAPI.generateEmplCode()).data;
-  formValue.employeeCode = newEmplCode;
-  modalMode.value = "add";
-  openEmployeeModal.value = true;
-};
 
 /**
- * Hàm lấy thông tin employee dựa vào dòng lựa chọn
- * @param row
+ * Hàm lấy thông tin nhân viên theo ID
+ * @param {Object} row - Đối tượng hàng được chọn
+ * @param {string} row.employeeId - ID của nhân viên
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
  */
 const handleGetEmplInforById = async (row) => {
   try {
@@ -465,8 +405,61 @@ const handleGetEmplInforById = async (row) => {
   }
 };
 
-const edditedEmplId = ref(null);
+/**
+ * Hàm hiển thị modal ở chế độ thêm mới
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
+const enableAddModeModal = async () => {
+  try {
+    resetForm();
+    const newEmplCode = await EmployeeAPI.generateEmplCode();
 
+    formValue.employeeCode = newEmplCode.data;
+    modalMode.value = "add";
+    openEmployeeModal.value = true;
+  } catch (error) {
+    showDefaultErrorMessage();
+  }
+};
+
+/**
+ * Hàm hiển thị modal ở chế độ chỉnh sửa
+ * @param {Object} row - Đối tượng hàng được chọn
+ * @param {string} row.employeeId - ID của nhân viên
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
+const enableEditModeModal = async (row) => {
+  await handleGetEmplInforById(row);
+  edditedEmplId.value = row.employeeId;
+  modalMode.value = "edit";
+  openEmployeeModal.value = true;
+};
+
+/**
+ * Hàm hiển thị modal ở chế độ nhân bản
+ * @param {Object} row - Đối tượng hàng được chọn
+ * @param {string} row.employeeId - ID của nhân viên
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
+const enableDuplicateModeModal = async (row) => {
+  await handleGetEmplInforById(row);
+  const newEmplCode = (await EmployeeAPI.generateEmplCode()).data;
+  formValue.employeeCode = newEmplCode;
+  modalMode.value = "add";
+  openEmployeeModal.value = true;
+};
+// #endregion Methods - Xử lý form và modal
+
+// #region Methods - Xử lý thêm/sửa nhân viên
+/**
+ * Hàm thêm mới nhân viên vào hệ thống
+ * @returns {Promise<void>}
+ * @throws {Error} Lỗi từ API
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
 const addEmployee = async () => {
   try {
     const body = {
@@ -487,6 +480,12 @@ const addEmployee = async () => {
   }
 };
 
+/**
+ * Hàm chỉnh sửa thông tin nhân viên trong hệ thống
+ * @returns {Promise<void>}
+ * @throws {Error} Lỗi từ API
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
 const editEmployee = async () => {
   try {
     const id = edditedEmplId.value;
@@ -506,6 +505,13 @@ const editEmployee = async () => {
     throw error;
   }
 };
+
+/**
+ * Hàm xử lý lưu thông tin nhân viên (thêm mới hoặc chỉnh sửa)
+ * @param {Object} data - Dữ liệu form từ modal
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
 const handleSave = async (data) => {
   Object.assign(formValue, data);
   switch (modalMode.value) {
@@ -552,9 +558,12 @@ const handleSave = async (data) => {
       }
   }
 };
+
 /**
- *
- * @param data
+ * Hàm xử lý lưu và tiếp tục thêm mới nhân viên
+ * @param {Object} data - Dữ liệu form từ modal
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
  */
 const handleSaveAndContinue = async (data) => {
   Object.assign(formValue, data);
@@ -577,18 +586,84 @@ const handleSaveAndContinue = async (data) => {
     }
   }
 };
+// #endregion Methods - Xử lý thêm/sửa nhân viên
+
+// #region Methods - Xử lý xóa nhân viên
+/**
+ * Hàm xác nhận xóa một hoặc nhiều nhân viên
+ * @param {Object|Array} item - Dữ liệu nhân viên hoặc mảng ID
+ * @param {string} item.employeeId - ID nhân viên (nếu là object)
+ * @returns {void}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
+const handleConfirmDelete = (item) => {
+  if (Array.isArray(item)) {
+    currentIdsToDelete.value = [...item];
+  } else {
+    currentIdsToDelete.value = [item.employeeId];
+  }
+  openConfirmDeleteModal.value = true;
+};
 
 /**
- *
+ * Hàm xử lý xóa bản ghi nhân viên (đơn hoặc hàng loạt)
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
  */
+const handleDelete = async () => {
+  try {
+    if (currentIdsToDelete.value.length === 0) return;
+    else if (currentIdsToDelete.value.length === 1) {
+      await EmployeeAPI.delete(currentIdsToDelete.value[0]);
+      showDefaultSuccessMessage();
+    } else {
+      await EmployeeAPI.deleteBatch(currentIdsToDelete.value);
+      showDefaultSuccessMessage();
+    }
+  } catch (error) {
+  } finally {
+    await setDefaultPage();
+    openConfirmDeleteModal.value = false;
+    currentIdsToDelete.value = [];
+  }
+};
+// #endregion Methods - Xử lý xóa nhân viên
 
-const columnsToExport = ref([]);
+// #region Methods - Xử lý select/multi-select
+/**
+ * Hàm xử lý các chức năng dropdown khi chọn tất cả (ví dụ: xóa tất cả)
+ * @param {Object} item - Item được chọn từ dropdown
+ * @param {string} item.key - Khóa của action (ví dụ: 'deleteAll')
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
+const handleSelectAllFunctions = async (item) => {
+  switch (item.key) {
+    case "deleteAll":
+      handleConfirmDelete(selectedIds.value);
+      break;
+  }
+};
+// #endregion Methods - Xử lý select/multi-select
+
+// #region Methods - Xử lý xuất dữ liệu
+/**
+ * Hàm xử lý chọn các cột để xuất dữ liệu ra Excel
+ * @param {Array} cols - Danh sách các cột được chọn
+ * @returns {void}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
 const handleChooseColumns = (cols) => {
   columnsToExport.value = cols;
   openExportColumnModal.value = false;
   openConfirmExportExcelFile.value = true;
 };
 
+/**
+ * Hàm xử lý xuất dữ liệu nhân viên ra file Excel
+ * @returns {Promise<void>}
+ * createdby: Nguyễn Thanh Long - 09.12.2025
+ */
 const handleExportExcel = async () => {
   try {
     const res = await EmployeeAPI.exportData(columnsToExport.value);
@@ -609,5 +684,35 @@ const handleExportExcel = async () => {
     openConfirmExportExcelFile.value = false;
   }
 };
+// #endregion Methods - Xử lý xuất dữ liệu
+
+// #region Computed Properties
+/**
+ * Danh sách ID của các nhân viên được chọn từ bảng
+ */
+const selectedIds = computed(() =>
+  Object.keys(selectedMap.value).filter((id) => selectedMap.value[id])
+);
+// #endregion Computed Properties
+
+// #region Lifecycle Hooks
+/**
+ * Hook chạy khi component được mount - lấy dữ liệu ban đầu
+ */
+onMounted(async () => await fetchEmployees());
+
+/**
+ * Watch: Lấy lại dữ liệu khi người dùng chuyển trang
+ */
+watch(page, async (newPage, oldPage) => {
+  try {
+    if (newPage !== oldPage) {
+      await fetchEmployees();
+    }
+  } catch {
+    rows.value = [];
+  }
+});
+// #endregion Lifecycle Hooks
 </script>
 <style scoped></style>

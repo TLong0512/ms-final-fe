@@ -1,7 +1,46 @@
+// #region Format Functions
 /**
- * Hàm chung handle format
- * @param value giá trị cần format
- * @param type loại áp dụng
+ * Hàm định dạng số theo tiêu chuẩn địa phương
+ * @param {number} value - Giá trị số cần định dạng
+ * @returns {string} Chuỗi số đã được định dạng hoặc chuỗi rỗng nếu null/undefined
+ * createdby: pdthien - 15.10.2025
+ */
+export const formatNumber = (value) => {
+  if (value === null || value === undefined) return "";
+  return new Intl.NumberFormat().format(value);
+};
+
+/**
+ * Hàm định dạng ngày tháng theo tiêu chuẩn địa phương
+ * @param {string|Date} value - Giá trị ngày cần định dạng
+ * @returns {string} Chuỗi ngày đã được định dạng hoặc chuỗi rỗng nếu không hợp lệ
+ * createdby: pdthien - 15.10.2025
+ */
+export const formatDate = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  return new Intl.DateTimeFormat().format(date);
+};
+
+/**
+ * Hàm định dạng chuỗi ký tự
+ * @param {any} value - Giá trị cần chuyển thành chuỗi
+ * @returns {string} Chuỗi ký tự hoặc chuỗi rỗng nếu null/undefined
+ * createdby: pdthien - 15.10.2025
+ */
+export const formatText = (value) => {
+  if (value === null || value === undefined) return "";
+  return String(value);
+};
+// #endregion Format Functions
+
+// #region Main Format Handler
+/**
+ * Hàm chung để xử lý định dạng dữ liệu theo loại được chỉ định
+ * @param {any} value - Giá trị cần định dạng
+ * @param {string} type - Loại định dạng: 'number', 'date', 'text'
+ * @returns {string} Dữ liệu đã được định dạng
+ * createdby: pdthien - 15.10.2025
  */
 export const handleFormat = (value, type) => {
   switch (type) {
@@ -15,36 +54,4 @@ export const handleFormat = (value, type) => {
       return formatText(value);
   }
 };
-/**
- * Hàm định dạng số
- * @param {*} value
- * @returns
- * createdby: pdthien - 15.10.2025
- */
-export const formatNumber = (value) => {
-  if (value === null || value === undefined) return "";
-  return new Intl.NumberFormat().format(value);
-};
-
-/**
- * Hàm định dạng ngày tháng
- * @param {*} value
- * @returns
- * createdby: pdthien - 15.10.2025
- */
-export const formatDate = (value) => {
-  if (!value) return "";
-  const date = new Date(value);
-  return new Intl.DateTimeFormat().format(date);
-};
-
-/**
- * Hàm định dạng chuỗi
- * @param {*} value
- * @returns
- * createdby: pdthien - 15.10.2025
- */
-export const formatText = (value) => {
-  if (value === null || value === undefined) return "";
-  return String(value);
-};
+// #endregion Main Format Handler
