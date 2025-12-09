@@ -21,3 +21,7 @@ export const openErrorModal = ref(false);
  * Modal hiển thị xác nhận xuất file
  */
 export const openConfirmExportExcelFile = ref(false);
+/**
+ *
+ */
+export const openExportColumnModal = ref(false);

@@ -57,24 +57,11 @@ export default class BaseAPI {
     });
   }
 
-  /**
-   * Hàm xuất dữ liệu
-   * @param {*} ids : danh sách id cần xuất excel
-   * @returns
-   */
-  exportListDataToExcel(ids = {}) {
-    return api.get(`${this.controler}/export-excel`, {
-      params: { ids },
-      responseType: "blob",
-    });
-  }
-  /**
-   *
-   * @returns
-   */
-  exportAllDataToExcel() {
-    return api.get(`${this.controler}/export-excel`, {
-      responseType: "blob",
-    });
+  exportData(columns) {
+    return api.post(
+      `${this.controler}/export-excel`,
+      { columns },
+      { responseType: "arraybuffer" }
+    );
   }
 }

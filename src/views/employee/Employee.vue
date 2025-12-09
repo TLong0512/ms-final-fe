@@ -54,7 +54,7 @@
           <!-- export button -->
           <div
             class="icon-export-excel"
-            @click="openConfirmExportExcelFile = true"
+            @click="openExportColumnModal = true"
           ></div>
         </div>
       </div>
@@ -134,6 +134,13 @@
       </template>
     </ms-confimation>
 
+    <!-- Modal lựa chọn các cột xuất excel -->
+    <ms-export-column-modal
+      :visible="openExportColumnModal"
+      @close="openExportColumnModal = false"
+      @confirm="handleChooseColumns"
+    />
+
     <!-- Thông báo xuất dữ liệu -->
     <ms-confimation v-model="openConfirmExportExcelFile" :title="'Xác nhận'">
       <template #icon>
@@ -198,6 +205,7 @@ import {
   openConfirmDeleteModal,
   openErrorModal,
   openConfirmExportExcelFile,
+  openExportColumnModal,
 } from "@/common/constant/modals";
 import {
   rows,
@@ -218,7 +226,7 @@ import {
   messageType,
   messageContent,
 } from "@/common/constant/message";
-
+import MsExportColumnModal from "@/components/ms-modal/ms-functional-modal/MsExportColumnModal.vue";
 /**
  * Dữ liệu cho form
  */
@@ -573,26 +581,30 @@ const handleSaveAndContinue = async (data) => {
 /**
  *
  */
+
+const columnsToExport = ref([]);
+const handleChooseColumns = (cols) => {
+  columnsToExport.value = cols;
+  openExportColumnModal.value = false;
+  openConfirmExportExcelFile.value = true;
+};
+
 const handleExportExcel = async () => {
   try {
-    const res = await EmployeeAPI.exportAllDataToExcel();
+    const res = await EmployeeAPI.exportData(columnsToExport.value);
 
     const blob = new Blob([res.data], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
+
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "Employee.xlsx";
+    link.download = "misa-employee.xlsx";
     link.click();
     window.URL.revokeObjectURL(url);
-    showDefaultSuccessMessage();
   } catch (error) {
-    openMessage.value = true;
-    messageContent.title = "Lỗi";
-    messageContent.description =
-      "Đã xảy ra lỗi trong quá trình xuất file, vui lòng thử lại sau";
-    messageType.value = "error";
+    console.error(error);
   } finally {
     openConfirmExportExcelFile.value = false;
   }
