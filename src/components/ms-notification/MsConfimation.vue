@@ -1,3 +1,8 @@
+<!--
+ * Component MsConfirmation - Confirmation dialog
+ * Modal xác nhận với icon, nội dung và các hành động
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ -->
 <template>
   <a-modal v-model:open="open" :title="title" centered destroy-on-close>
     <div class="flex items-center p-4">
@@ -17,8 +22,15 @@
   </a-modal>
 </template>
 <script setup>
+/**
+ * v-model binding cho trạng thái modal
+ */
 const open = defineModel();
 
+/**
+ * Props:
+ * @property {String} title - Tiêu đề của confirmation dialog
+ */
 const props = defineProps({
   title: {
     type: String,
@@ -26,6 +38,11 @@ const props = defineProps({
   },
 });
 
+/**
+ * Hàm xử lý cancel - đóng modal
+ * @returns {void}
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ */
 const handleCancel = () => {
   open.value = false;
 };

@@ -100,4 +100,14 @@ const isOpened = ref(true);
 .hide-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari */
 }
+@media (max-width: 1024px) {
+  .sidebar span {
+    display: none;
+  }
+  .item-content,
+  .main-logo {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
 </style>

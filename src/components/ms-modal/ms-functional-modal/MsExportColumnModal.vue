@@ -3,7 +3,7 @@
     :visible="visible"
     :width="400"
     title="Chọn các cột cần xuất"
-    @requestClose="$emit('close')"
+    @requestClose="handleCancel"
   >
     <template #content>
       <div class="flex flex-col gap-2">
@@ -31,34 +31,46 @@
 
 <script setup>
 import { reactive } from "vue";
-import { employeeFields } from "@/common/constant/tables/employeeTable";
 import MsCheckbox from "@/components/ms-checkbox/MsCheckbox.vue";
 import MsModal from "../MsModal.vue";
 import { computed } from "vue";
 
 const selectAll = computed({
   get() {
-    return fields.every((f) => selected[f.key] === true);
+    return props.fields.every((f) => selected[f.key] === true);
   },
   set(value) {
-    fields.forEach((f) => {
+    props.fields.forEach((f) => {
       selected[f.key] = value;
     });
   },
 });
 
 const props = defineProps({
-  visible: Boolean,
+  visible: {},
+  fields: {},
 });
 
 const emit = defineEmits(["close", "confirm"]);
 
-const fields = employeeFields;
-
 const selected = reactive({});
 
+/**
+ * Hàm xử lý cancel - bỏ chọn tất cả các nội dung đã chọn
+ * @returns {void}
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ */
+const handleCancel = () => {
+  // Reset tất cả các selection về false
+  props.fields.forEach((f) => {
+    selected[f.key] = false;
+  });
+  // Emit close event
+  emit("close");
+};
+
 const confirm = () => {
-  const columns = fields
+  const columns = props.fields
     .filter((f) => selected[f.key])
     .map((f) => ({
       key: f.key,

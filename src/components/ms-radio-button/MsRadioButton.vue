@@ -1,3 +1,8 @@
+<!--
+ * Component MsRadioButton - Custom radio button group wrapper
+ * Wrapper component cho Ant Design radio group
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ -->
 <template>
   <a-radio-group v-model:value="model" name="radioGroup">
     <a-radio v-for="item in options" :key="item.key" :value="item.key">
@@ -6,9 +11,17 @@
   </a-radio-group>
 </template>
 <script setup>
+/**
+ * Props:
+ * @property {Array} options - Danh sách các radio options (key, name)
+ */
 const props = defineProps({
   options: { type: Array, required: true },
 });
+
+/**
+ * v-model binding cho giá trị radio selected
+ */
 const model = defineModel();
 </script>
 

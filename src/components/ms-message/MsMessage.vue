@@ -1,3 +1,8 @@
+<!--
+ * Component MsMessage - Global notification/message display
+ * Hiển thị message thông báo toàn cục sử dụng Ant Design notification
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ -->
 <template></template>
 <script setup>
 import { message, notification } from "ant-design-vue";
@@ -8,6 +13,11 @@ import {
   messageType,
 } from "@/common/constant/message";
 
+/**
+ * Hàm mở notification
+ * @returns {void}
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ */
 const openNotification = () => {
   notification.open({
     message: () => messageContent.title,
@@ -23,6 +33,12 @@ const openNotification = () => {
     placement: "bottomRight",
   });
 };
+
+/**
+ * Hàm xác định class CSS dựa trên message type
+ * @returns {String} Class CSS tương ứng
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ */
 const getNotificationClass = () => {
   switch (messageType.value) {
     case "success":
@@ -34,6 +50,10 @@ const getNotificationClass = () => {
   }
 };
 
+/**
+ * Watch: Lắng nghe openMessage state
+ * Khi message cần mở, trigger openNotification()
+ */
 watch(openMessage, (val) => {
   if (val) {
     openNotification();

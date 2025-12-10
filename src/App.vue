@@ -9,12 +9,15 @@
       <!-- Main content -->
       <router-view class="flex-1 min-w-0 min-h-0 main-content" />
     </div>
+    <!-- Loading spinner -->
+    <ms-loading />
   </div>
 </template>
 
 <script setup>
 import TheHeader from "./layout/TheHeader.vue";
 import TheSidebar from "./layout/TheSidebar.vue";
+import MsLoading from "./components/ms-loading/MsLoading.vue";
 </script>
 <style>
 *,

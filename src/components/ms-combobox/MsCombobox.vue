@@ -1,3 +1,8 @@
+<!--
+ * Component MsCombobox - Custom combobox/autocomplete wrapper
+ * Wrapper component cho Vuetify autocomplete
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ -->
 <template>
   <v-autocomplete
     v-model="model"
@@ -14,7 +19,15 @@
   </v-autocomplete>
 </template>
 <script setup>
+/**
+ * v-model binding cho giá trị selected
+ */
 const model = defineModel();
+
+/**
+ * Props:
+ * @property {Array} options - Danh sách các options có cấu trúc {key, label}
+ */
 const props = defineProps({
   options: {
     type: Array,

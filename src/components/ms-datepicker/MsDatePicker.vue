@@ -1,3 +1,8 @@
+<!--
+ * Component MsDatePicker - Custom date picker wrapper
+ * Wrapper component cho Ant Design date picker
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ -->
 <template>
   <a-date-picker
     v-model:value="model"
@@ -6,7 +11,16 @@
   />
 </template>
 <script setup>
+/**
+ * v-model binding cho ngày được chọn
+ */
 const model = defineModel();
+
+/**
+ * Props:
+ * @property {String} placeholder - Text placeholder hiển thị trong input
+ * @property {String} dateFormat - Format của date (default: DD/MM/YYYY)
+ */
 const props = defineProps({
   placeholder: {
     type: String,

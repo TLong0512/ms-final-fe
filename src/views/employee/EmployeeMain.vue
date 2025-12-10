@@ -137,6 +137,7 @@
     <!-- Modal lựa chọn các cột xuất excel -->
     <ms-export-column-modal
       :visible="openExportColumnModal"
+      :fields="fields"
       @close="openExportColumnModal = false"
       @confirm="handleChooseColumns"
     />
@@ -227,6 +228,7 @@ import {
   messageContent,
 } from "@/common/constant/message";
 import MsExportColumnModal from "@/components/ms-modal/ms-functional-modal/MsExportColumnModal.vue";
+import { useLoading } from "@/utils/useLoading";
 
 // #region State Data
 /**
@@ -253,6 +255,11 @@ const currentIdsToDelete = ref([]);
  * Các cột được chọn để xuất excel
  */
 const columnsToExport = ref([]);
+
+/**
+ * Quản lý trạng thái loading
+ */
+const { isLoading, withLoading } = useLoading();
 // #endregion State Data
 
 // #region Methods - Xử lý trang (Pagination & Search)
@@ -276,11 +283,13 @@ const fetchEmployees = async ({
     };
 
     const res = searchValue.value
-      ? await EmployeeAPI.search({
-          ...apiParams,
-          data: searchValue.value,
-        })
-      : await EmployeeAPI.paging(apiParams);
+      ? await withLoading(() =>
+          EmployeeAPI.search({
+            ...apiParams,
+            data: searchValue.value,
+          })
+        )
+      : await withLoading(() => EmployeeAPI.paging(apiParams));
 
     const data = res.data || {};
 
@@ -378,7 +387,9 @@ const resetForm = () => {
  */
 const handleGetEmplInforById = async (row) => {
   try {
-    const response = await EmployeeAPI.getEmplById(row.employeeId);
+    const response = await withLoading(() =>
+      EmployeeAPI.getEmplById(row.employeeId)
+    );
     const result = response.data;
     Object.assign(formValue, {
       employeeCode: result.employeeCode || "",
@@ -413,7 +424,7 @@ const handleGetEmplInforById = async (row) => {
 const enableAddModeModal = async () => {
   try {
     resetForm();
-    const newEmplCode = await EmployeeAPI.generateEmplCode();
+    const newEmplCode = await withLoading(() => EmployeeAPI.generateEmplCode());
 
     formValue.employeeCode = newEmplCode.data;
     modalMode.value = "add";
@@ -614,10 +625,12 @@ const handleDelete = async () => {
   try {
     if (currentIdsToDelete.value.length === 0) return;
     else if (currentIdsToDelete.value.length === 1) {
-      await EmployeeAPI.delete(currentIdsToDelete.value[0]);
+      await withLoading(() => EmployeeAPI.delete(currentIdsToDelete.value[0]));
       showDefaultSuccessMessage();
     } else {
-      await EmployeeAPI.deleteBatch(currentIdsToDelete.value);
+      await withLoading(() =>
+        EmployeeAPI.deleteBatch(currentIdsToDelete.value)
+      );
       showDefaultSuccessMessage();
     }
   } catch (error) {
@@ -661,12 +674,17 @@ const handleChooseColumns = (cols) => {
 
 /**
  * Hàm xử lý xuất dữ liệu nhân viên ra file Excel
+/**
+ * Hàm xử lý xuất dữ liệu nhân viên ra file Excel
  * @returns {Promise<void>}
  * createdby: Nguyễn Thanh Long - 09.12.2025
  */
 const handleExportExcel = async () => {
   try {
-    const res = await EmployeeAPI.exportData(columnsToExport.value);
+    openConfirmExportExcelFile.value = false;
+    const res = await withLoading(() =>
+      EmployeeAPI.exportData(columnsToExport.value)
+    );
 
     const blob = new Blob([res.data], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -678,10 +696,12 @@ const handleExportExcel = async () => {
     link.download = "misa-employee.xlsx";
     link.click();
     window.URL.revokeObjectURL(url);
+
+    showDefaultSuccessMessage();
   } catch (error) {
-    console.error(error);
-  } finally {
     openConfirmExportExcelFile.value = false;
+    console.error(error);
+    showDefaultErrorMessage();
   }
 };
 // #endregion Methods - Xử lý xuất dữ liệu

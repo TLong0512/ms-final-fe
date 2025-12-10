@@ -272,6 +272,7 @@ import {
 } from "@/common/constant/modals";
 import { cloneDeep } from "lodash";
 import { employeeRules } from "@/common/constant/form/employeeForm";
+import { useLoading } from "@/utils/useLoading";
 
 // #region Props & Emits
 /**
@@ -325,6 +326,11 @@ const employeeCodeInput = ref(null);
  * Ref để validate form
  */
 const formRef = ref();
+
+/**
+ * Quản lý trạng thái loading
+ */
+const { withLoading } = useLoading();
 // #endregion State Data
 
 // #region Methods - Xử lý form validation và dirty check
@@ -397,7 +403,7 @@ const handleSaveAndContinue = async () => {
  */
 const initGenderOptions = async () => {
   try {
-    const genderRes = await GenderAPI.getAll();
+    const genderRes = await withLoading(() => GenderAPI.getAll());
     genderOptions.value = genderRes.data.map((data) => ({
       key: data.genderId,
       name: data.name,
@@ -414,7 +420,7 @@ const initGenderOptions = async () => {
  */
 const initDepartmentOptions = async () => {
   try {
-    const departmentRes = await DepartmentAPI.getAll();
+    const departmentRes = await withLoading(() => DepartmentAPI.getAll());
     departmentOptions.value = departmentRes.data.map((data) => ({
       key: data.departmentId,
       label: data.name,

@@ -1,3 +1,8 @@
+<!--
+ * Component MsDropdown - Custom dropdown menu wrapper
+ * Wrapper component cho Ant Design dropdown
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ -->
 <template>
   <a-dropdown
     class="cursor-pointer"
@@ -24,17 +29,27 @@
 
 <script setup>
 /**
- *Prop:
-  1. dropDownItems: bao gồm item, icon, link navigate
-  2. isBubble: hình dạng của dropdown
+ * Props:
+ * @property {Array} dropDownItems - Danh sách items có cấu trúc {title, icon?, ...}
+ * @property {Boolean} isBubble - Hình dạng dropdown (bubble style)
  */
 const props = defineProps({
   dropDownItems: Array,
   isBubble: { type: Boolean, default: false },
 });
 
+/**
+ * Emits
+ * - select: Phát sinh khi user chọn một item từ dropdown
+ */
 const emit = defineEmits(["select"]);
 
+/**
+ * Hàm xử lý khi user chọn item
+ * @param {Object} item - Item được chọn
+ * @returns {void}
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ */
 const onSelect = (item) => {
   emit("select", item);
 };

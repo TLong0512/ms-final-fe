@@ -4,7 +4,7 @@ import axios from "axios";
 /**
  * Base URL của API server
  */
-const baseURL = "https://localhost:8000";
+const baseURL = "https://localhost:44314";
 
 /**
  * Tạo instance axios với cấu hình base URL

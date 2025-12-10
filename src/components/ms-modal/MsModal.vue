@@ -1,3 +1,8 @@
+<!--
+ * Component MsModal - Custom modal/dialog wrapper
+ * Wrapper component cho Ant Design modal
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ -->
 <template>
   <a-modal
     :open="visible"
@@ -25,6 +30,13 @@
 </template>
 
 <script setup>
+/**
+ * Props:
+ * @property {Boolean} visible - Trạng thái hiển thị modal
+ * @property {String} title - Tiêu đề của modal
+ * @property {String|Number} width - Chiều rộng modal (default: 900px)
+ * @property {Boolean} saving - Trạng thái saving (dành cho future use)
+ */
 defineProps({
   visible: { type: Boolean, required: true },
   title: { type: String, required: true },
@@ -32,6 +44,10 @@ defineProps({
   saving: { type: Boolean, default: false },
 });
 
+/**
+ * Emits
+ * - requestClose: Phát sinh khi user yêu cầu đóng modal
+ */
 defineEmits(["requestClose"]);
 </script>
 

@@ -1,3 +1,8 @@
+<!--
+ * Component MsCheckbox - Custom checkbox wrapper
+ * Wrapper component cho Ant Design checkbox
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ -->
 <template>
   <a-checkbox :checked="model" @change="model = $event.target.checked">
     <slot name="content" />
@@ -5,6 +10,11 @@
 </template>
 
 <script setup>
+/**
+ * v-model binding cho trạng thái checkbox
+ * @type {Boolean}
+ * Default: false
+ */
 const model = defineModel({
   type: Boolean,
   default: false,

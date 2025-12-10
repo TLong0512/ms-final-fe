@@ -1,3 +1,8 @@
+<!--
+ * Component MsPagination - Custom pagination wrapper
+ * Wrapper component cho Ant Design pagination
+ * createdby: Nguyễn Thanh Long - 10.12.2025
+ -->
 <template>
   <a-pagination
     v-model:current="model"
@@ -8,6 +13,11 @@
 </template>
 
 <script setup>
+/**
+ * Props:
+ * @property {Number} totalItems - Tổng số items
+ * @property {Number} pageSize - Số items trên mỗi trang
+ */
 const props = defineProps({
   totalItems: {
     type: Number,
@@ -19,6 +29,9 @@ const props = defineProps({
   },
 });
 
+/**
+ * v-model binding cho trang hiện tại
+ */
 const model = defineModel();
 </script>
 
